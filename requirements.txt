@@ -6,5 +6,6 @@ py3Dmol
 pymatgen
 ase
 joblib
+scikit-learn
 openpyxl
 matgl
