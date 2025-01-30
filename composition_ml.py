@@ -216,15 +216,8 @@ def run_composition_model():
         # Display Results
         # -----------------------------------
         st.subheader("🧪 Extracted Composition")
-
-        raw_formula_display = f'<p style="color:green; background-color:lightgrey; padding:5px; border-radius:5px; font-size:16px;">Raw Formula: {raw_formula}</p>'
-        normalized_formula_display = f'<p style="color:green; background-color:lightgrey; padding:5px; border-radius:5px; font-size:16px;">Normalized Composition: {normalized_formula}</p>'
-        st.markdown(raw_formula_display, unsafe_allow_html=True)
-        st.markdown(normalized_formula_display, unsafe_allow_html=True)
-
-        #st.write(f"**Raw Formula:** {raw_formula}")
-        # The normalized formula will now appear in the correct A→B→C→X or A→B→X order
-        #st.write(f"**Normalized Composition:** {normalized_formula}")
+        st.write(f"**Raw Formula:** `{raw_formula}`")
+        st.write(f"**Normalized Composition:** `{normalized_formula}`")
 
         st.subheader("Crystal Structure Visualization")
         view = py3Dmol.view(width=600, height=600)
