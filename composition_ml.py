@@ -165,7 +165,7 @@ def run_composition_model():
     """)
 
     st.markdown("""
-    **This MLFF model is trained on a chemical space that includes:**
+    **This Random Forest (RF) model is trained on a chemical space that includes:**
     - **A₂BCX₄-type**:  
       - A-site: `Ag, Cs, Cu, K, Na, Rb`  
       - B-site: `Ba, Ca, Cd, Mg, Sr, Zn`  
