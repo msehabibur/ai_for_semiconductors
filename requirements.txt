@@ -1,8 +1,8 @@
 aiohappyeyeballs==2.4.4
 aiohttp==3.11.11
-torch==2.2.1
-torchdata==0.10.1
-torchmetrics==1.6.1
+torch
+torchdata
+torchmetrics
 aiosignal==1.3.2
 altair==5.5.0
 py3Dmol
