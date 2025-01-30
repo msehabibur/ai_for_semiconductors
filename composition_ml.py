@@ -219,8 +219,8 @@ def run_composition_model():
         # Display Extracted Composition in Streamlit with styled formatting
         st.subheader("🧪 Extracted Composition")
 
-        raw_formula_display = f'<p style="color:green; background-color:lightgrey; padding:5px; border-radius:5px; font-size:16px;">Raw Formula: {raw_formula}</p>'
-        normalized_formula_display = f'<p style="color:green; background-color:lightgrey; padding:5px; border-radius:5px; font-size:16px;">Normalized Composition: {normalized_formula}</p>'
+        raw_formula = f'<p style="color:green; background-color:lightgrey; padding:5px; border-radius:5px; font-size:16px;">Raw Formula: {raw_formula}</p>'
+        normalized_formula = f'<p style="color:green; background-color:lightgrey; padding:5px; border-radius:5px; font-size:16px;">Normalized Composition: {normalized_formula}</p>'
 
         # Render as HTML
         #st.markdown(raw_formula_display, unsafe_allow_html=True)
