@@ -140,7 +140,8 @@ def run_composition_model():
         descriptors, normalized_formula = extract_elemental_properties(raw_formula)
 
         # Predict using RF model
-        prediction = rf_model.predict(pd.DataFrame([descriptors]).reindex(columns=rf_model.feature_names_in_, fill_value=0))[0]
+        descriptor_df = pd.DataFrame([descriptors]).reindex(columns=rf_model.feature_names_in_, fill_value=0)
+        prediction = rf_model.predict(descriptor_df)[0]
 
         # Look up DFT bandgap if available
         dft_gap = get_dft_bandgap(normalized_formula, selected_phase)
@@ -162,6 +163,10 @@ def run_composition_model():
         view.setStyle({"stick": {}})
         view.zoomTo()
         st.components.v1.html(view._make_html(), height=600)
+
+        # **Generated Descriptors**
+        st.subheader("Generated Descriptors")
+        st.dataframe(descriptor_df)
 
         # **Bandgap Prediction**
         st.subheader("Predicted Bandgap")
