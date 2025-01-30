@@ -1,11 +1,15 @@
+# Install required libraries (if not installed, uncomment and run)
+# !pip install transformers torch streamlit
+
 import streamlit as st
 from transformers import pipeline
 
-# Load Hugging Face model for text generation
+# Load an open-source, public model from Hugging Face (No authentication required)
 @st.cache_resource
 def load_model():
     return pipeline("text-generation", model="google/gemma-2b-it", torch_dtype="auto", device_map="auto")
 
+# Load the model
 model = load_model()
 
 # Streamlit UI
