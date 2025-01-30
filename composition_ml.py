@@ -48,7 +48,6 @@ def normalize_composition(elements, compound_type):
 def format_normalized_composition(elements, compound_type):
     """Return a correctly ordered formula string for A2BCX4 or ABX2."""
     
-    # Sorting elements into respective sites
     A_site, B_site, C_site, X_site = {}, {}, {}, {}
     
     for el, amt in elements.items():
@@ -61,19 +60,32 @@ def format_normalized_composition(elements, compound_type):
         elif el in X_elements_A2BCX4:
             X_site[el] = amt
 
-    # Sort elements within each site alphabetically
+    # Sort elements alphabetically within each site
     sorted_A = sorted(A_site.items())
     sorted_B = sorted(B_site.items())
     sorted_C = sorted(C_site.items())
     sorted_X = sorted(X_site.items())
 
-    # Build formula string
+    # Build formula string in correct order
     formula_parts = []
     for group in [sorted_A, sorted_B, sorted_C if compound_type == "A2BCX4" else [], sorted_X]:
         for (el, amt) in group:
             formula_parts.append(f"{el}{int(amt) if amt.is_integer() else amt}")
 
     return "".join(formula_parts)
+
+def get_dft_bandgap(normalized_composition, selected_phase):
+    """
+    Look up the DFT bandgap from data_df (if present) by matching composition + phase.
+    Returns a string like '1.23' or 'Not Available'.
+    """
+    norm_dict = parse_elements(normalized_composition)
+    for _, row in data_df.iterrows():
+        csv_formula = row["Semiconductors"].replace("_kesterite", "").replace("_stannite", "")
+        csv_dict = parse_elements(csv_formula)
+        if csv_dict == norm_dict and row["Semiconductors"].endswith(selected_phase):
+            return f"{row['gap']:.2f}"
+    return "Not Available"
 
 # ---------------------------------------------------------------------
 # 3. Main Streamlit App
@@ -102,6 +114,13 @@ def run_composition_model():
         normalized_composition = normalize_composition(parsed_elements, compound_type)
         formatted_formula = format_normalized_composition(normalized_composition, compound_type)
 
+        # Predict bandgap using ML model
+        descriptor_df = pd.DataFrame([normalized_composition]).reindex(columns=rf_model.feature_names_in_, fill_value=0)
+        prediction = rf_model.predict(descriptor_df)[0]
+
+        # Look up DFT bandgap
+        dft_gap = get_dft_bandgap(formatted_formula, selected_phase)
+
         # Clean up temporary file
         os.remove(temp_filepath)
 
@@ -120,14 +139,12 @@ def run_composition_model():
         view.zoomTo()
         st.components.v1.html(view._make_html(), height=600)
 
-        # **Predict Bandgap**
+        # **Predicted Bandgap**
         st.subheader("Predicted Bandgap")
-        descriptor_df = pd.DataFrame([normalized_composition]).reindex(columns=rf_model.feature_names_in_, fill_value=0)
-        prediction = rf_model.predict(descriptor_df)[0]
-        
         results_df = pd.DataFrame({
             "Compound": [formatted_formula],
             "Phase": [selected_phase],
+            "DFT Bandgap (HSE+SOC)": [dft_gap],
             "RF Predicted Bandgap (HSE+SOC)": [f"{prediction:.2f} eV"]
         })
         st.dataframe(results_df.style.hide(axis="index"))
