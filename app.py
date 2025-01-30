@@ -2,9 +2,9 @@ import streamlit as st
 from transformers import pipeline
 
 # Load Hugging Face model for text generation
-@st.cache_resource  # Cache model for faster loads
+@st.cache_resource
 def load_model():
-    return pipeline("text-generation", model="mistralai/Mistral-7B-Instruct-v0.1", torch_dtype="auto", device_map="auto")
+    return pipeline("text-generation", model="google/gemma-2b-it", torch_dtype="auto", device_map="auto")
 
 model = load_model()
 
