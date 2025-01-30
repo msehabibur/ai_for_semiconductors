@@ -1,5 +1,6 @@
 import streamlit as st
 from composition_ml import run_composition_model
+from graph_based_mlff import run_graph_based_mlff
 
 # Main Title
 st.title("🚀 AI for Accelerating Discovery of A₂BCX₄ and ABX₂ Semiconductors for Thin-Film Solar Cells")
@@ -30,5 +31,7 @@ tab1, tab2 = st.tabs(["📊 Composition-Based ML Model", "📈 Graph-Based MLFF 
 with tab1:
     # Runs the composition-based ML model defined in composition_ml.py
     run_composition_model()
-
+with tab2:
+    # Runs the graph-based MLFF optimizer defined in graph_based_mlff.py
+    run_graph_based_mlff()
 
