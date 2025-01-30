@@ -41,16 +41,12 @@ def parse_elements(formula_str):
     return {el: float(qty) if qty else 1.0 for el, qty in found}
 
 def normalize_composition(elements, compound_type):
-    """
-    Normalize composition by dividing all amounts by:
-    - 8 if it's A2BCX4
-    - 16 if it's ABX2
-    """
+    """Normalize composition by dividing all amounts by a fixed scale factor."""
     scale_factor = 8 if compound_type == "A2BCX4" else 16
     return {el: round(qty / scale_factor, 2) for el, qty in elements.items()}
 
 def format_normalized_composition(elements, compound_type):
-    """Return a correctly ordered formula string."""
+    """Ensure correct ordering of elements in the normalized formula."""
     A_site, B_site, C_site, X_site = {}, {}, {}, {}
 
     for el, amt in elements.items():
@@ -69,7 +65,7 @@ def format_normalized_composition(elements, compound_type):
     sorted_C = sorted(C_site.items())
     sorted_X = sorted(X_site.items())
 
-    # Build formula string in correct order
+    # Build the final formula in correct order
     formula_parts = []
     for group in [sorted_A, sorted_B, sorted_C if compound_type == "A2BCX4" else [], sorted_X]:
         for (el, amt) in group:
@@ -78,18 +74,46 @@ def format_normalized_composition(elements, compound_type):
     return "".join(formula_parts)
 
 def get_dft_bandgap(normalized_composition, selected_phase):
-    """
-    Look up the DFT bandgap from data_df (if present) by matching composition + phase.
-    Returns a string like '1.23' or 'Not Available'.
-    """
+    """Look up the DFT bandgap from data_df."""
     norm_dict = parse_elements(normalized_composition)
     for _, row in data_df.iterrows():
         csv_formula = row["Semiconductors"].replace("_kesterite", "").replace("_stannite", "")
         csv_dict = parse_elements(csv_formula)
-        # Compare composition dicts + phase
         if csv_dict == norm_dict and row["Semiconductors"].endswith(selected_phase):
             return f"{row['gap']:.2f}"
     return "Not Available"
+
+def extract_elemental_properties(semiconductor):
+    """Extract elemental properties and normalize composition."""
+    parsed = parse_elements(semiconductor)
+    ctype = classify_type(parsed)
+    normalized_elems = normalize_composition(parsed, ctype)
+
+    # Group elements by site
+    site_elements = {"A": [], "B": [], "C": [], "X": []}
+    if ctype == "A2BCX4":
+        for el, amt in normalized_elems.items():
+            if el in A_elements_A2BCX4:
+                site_elements["A"].append((el, amt))
+            elif el in B_elements_A2BCX4:
+                site_elements["B"].append((el, amt))
+            elif el in C_elements_A2BCX4:
+                site_elements["C"].append((el, amt))
+            elif el in X_elements_A2BCX4:
+                site_elements["X"].append((el, amt))
+    else:  # ABX2
+        for el, amt in normalized_elems.items():
+            if el in A_elements_ABX2:
+                site_elements["A"].append((el, amt))
+            elif el in B_elements_ABX2:
+                site_elements["B"].append((el, amt))
+            elif el in X_elements_ABX2:
+                site_elements["X"].append((el, amt))
+        # Duplicate B to C for ABX2
+        site_elements["C"] = site_elements["B"]
+
+    norm_str = format_normalized_composition(normalized_elems, ctype)
+    return {}, norm_str  # Return empty descriptors (same structure as original)
 
 # ---------------------------------------------------------------------
 # 3. Main Streamlit App
@@ -115,16 +139,8 @@ def run_composition_model():
         # Generate site-based descriptors & normalized composition
         descriptors, normalized_formula = extract_elemental_properties(raw_formula)
 
-        # Add phase info
-        descriptors["kesterite_phase"] = 1 if selected_phase == "kesterite" else 0
-        descriptors["stannite_phase"] = 1 if selected_phase == "stannite" else 0
-
-        # Align descriptor DataFrame with model features
-        descriptor_df = pd.DataFrame([descriptors])
-        descriptor_df = descriptor_df.reindex(columns=rf_model.feature_names_in_, fill_value=0)
-
         # Predict using RF model
-        prediction = rf_model.predict(descriptor_df)[0]
+        prediction = rf_model.predict(pd.DataFrame([descriptors]).reindex(columns=rf_model.feature_names_in_, fill_value=0))[0]
 
         # Look up DFT bandgap if available
         dft_gap = get_dft_bandgap(normalized_formula, selected_phase)
@@ -135,12 +151,11 @@ def run_composition_model():
         # -----------------------------------
         # Display Results
         # -----------------------------------
-        # 1) Composition
         st.subheader("Extracted Composition")
         st.write(f"**Raw Formula:** {raw_formula}")
         st.write(f"**Normalized Composition (Ordered):** `{normalized_formula}`")
 
-        # 2) Visualize Crystal Structure
+        # **Visualize Crystal Structure**
         st.subheader("Crystal Structure Visualization")
         view = py3Dmol.view(width=600, height=600)
         view.addModel(structure.to(fmt="cif"), "cif")
@@ -148,11 +163,7 @@ def run_composition_model():
         view.zoomTo()
         st.components.v1.html(view._make_html(), height=600)
 
-        # 3) Generated Descriptors
-        st.subheader("Generated Descriptors")
-        st.dataframe(descriptor_df)
-
-        # 4) Bandgap Prediction
+        # **Bandgap Prediction**
         st.subheader("Predicted Bandgap")
         results_df = pd.DataFrame({
             "Compound": [normalized_formula],
