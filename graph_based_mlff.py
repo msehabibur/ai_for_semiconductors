@@ -239,8 +239,8 @@ def run_graph_based_mlff():
                 "Raw Composition": [raw_formula],
                 "Normalized Composition": [normalized_formula],
                 "Input Lattice Parameters (a, b, c)": [input_lattice_params],
-                "Relaxed Lattice Parameters (a, b, c)": [relaxed_lattice_params],
-                "MLFF Final Energy (eV)": [final_energy]
+                "MLFF Relaxed Lattice Parameters (a, b, c)": [relaxed_lattice_params],
+                "MLFF Final Energy (eV)":[f"{final_energy:.2f}"]
             })
             st.dataframe(results_df.style.hide(axis="index"))
 
