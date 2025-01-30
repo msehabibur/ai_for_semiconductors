@@ -231,7 +231,8 @@ def run_composition_model():
 
         st.subheader("Predicted Bandgap")
         results_df = pd.DataFrame({
-            "Compound": [normalized_formula],
+            "Raw Composition": [raw_formula],
+            "Normalized Composition": [normalized_formula],
             "Phase": [selected_phase],
             "DFT Bandgap (HSE+SOC)": [dft_gap],
             "ML Predicted Bandgap (RF)": [f"{prediction:.2f}"]
