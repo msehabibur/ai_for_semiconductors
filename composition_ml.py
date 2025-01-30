@@ -157,7 +157,7 @@ def run_composition_model():
 
     # **Chemical Space Description**
     st.markdown("""
-    **This MLFF model is trained on a chemical space that includes:**
+    **This Random Forest (RF) model is trained on a chemical space that includes:**
     - **A₂BCX₄-type compounds** with elements:  
       - A-site: `Ag, Cs, Cu, K, Na, Rb`  
       - B-site: `Ba, Ca, Cd, Mg, Sr, Zn`  
@@ -230,7 +230,7 @@ def run_composition_model():
             "Compound": [normalized_formula],
             "Phase": [selected_phase],
             "DFT Bandgap (HSE+SOC)": [dft_gap],
-            "ML Predicted Bandgap (RF)": [f"{prediction:.2f}"]
+            "RF Predicted Bandgap (HSE+SOC)": [f"{prediction:.2f}"]
         })
         st.dataframe(results_df.style.hide(axis="index"))
 
