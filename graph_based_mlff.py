@@ -209,7 +209,7 @@ def run_graph_based_mlff():
             status_text = st.empty()
             status_text.text("🔄 Starting MLFF optimization...")
 
-            relax_results = relaxer.relax(input_structure, fmax=0.0001, steps=5)
+            relax_results = relaxer.relax(input_structure, fmax=0.0001, steps=100)
             final_structure = relax_results["final_structure"]
             relaxed_lattice_params = tuple(round(p, 2) for p in final_structure.lattice.abc)  # Round to 2 decimals
             final_energy = round(float(relax_results["trajectory"].energies[-1]), 2)
